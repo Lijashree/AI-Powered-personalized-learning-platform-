@@ -1,0 +1,266 @@
+[
+  {
+    "title": "Binary Search",
+    "slug": "binary-search",
+    "difficulty": "Easy",
+    "tags": [
+      "Array",
+      "Binary Search"
+    ],
+    "reason": "Master the fundamental divide-and-conquer search pattern on sorted arrays."
+  },
+  {
+    "title": "Search Insert Position",
+    "slug": "search-insert-position",
+    "difficulty": "Easy",
+    "tags": [
+      "Array",
+      "Binary Search"
+    ],
+    "reason": "Learn how binary search finds the optimal target insertion index."
+  },
+  {
+    "title": "Search in Rotated Sorted Array",
+    "slug": "search-in-rotated-sorted-array",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Binary Search"
+    ],
+    "reason": "Classic interview problem for partitioned binary search conditions."
+  },
+  {
+    "title": "First Bad Version",
+    "slug": "first-bad-version",
+    "difficulty": "Easy",
+    "tags": [
+      "Binary Search"
+    ],
+    "reason": "Demonstrates boundary testing with minimal API calls using binary search."
+  },
+  {
+    "title": "Two Sum",
+    "slug": "two-sum",
+    "difficulty": "Easy",
+    "tags": [
+      "Array",
+      "HashMap",
+      "Two Pointers"
+    ],
+    "reason": "The quintessential hash table problem for O(N) complement lookups."
+  },
+  {
+    "title": "3Sum",
+    "slug": "3sum",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Two Pointers",
+      "Sorting"
+    ],
+    "reason": "Extends two-pointer technique to triplet sum calculations without duplicates."
+  },
+  {
+    "title": "Maximum Subarray",
+    "slug": "maximum-subarray",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Dynamic Programming",
+      "Divide and Conquer"
+    ],
+    "reason": "Fundamental study of Kadane's Algorithm for contiguous sub-segments."
+  },
+  {
+    "title": "Longest Substring Without Repeating Characters",
+    "slug": "longest-substring-without-repeating-characters",
+    "difficulty": "Medium",
+    "tags": [
+      "String",
+      "Sliding Window",
+      "HashMap"
+    ],
+    "reason": "Core problem for understanding sliding window with dynamic pointer movement."
+  },
+  {
+    "title": "Climbing Stairs",
+    "slug": "climbing-stairs",
+    "difficulty": "Easy",
+    "tags": [
+      "Dynamic Programming",
+      "Math",
+      "Memoization"
+    ],
+    "reason": "The best introduction to 1D dynamic programming and recurrence relations."
+  },
+  {
+    "title": "Coin Change",
+    "slug": "coin-change",
+    "difficulty": "Medium",
+    "tags": [
+      "Dynamic Programming",
+      "Breadth-First Search"
+    ],
+    "reason": "Essential unbounded knapsack DP pattern with state minimization."
+  },
+  {
+    "title": "Merge Intervals",
+    "slug": "merge-intervals",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Sorting"
+    ],
+    "reason": "Teaches interval sorting and merging overlapping ranges."
+  },
+  {
+    "title": "Valid Parentheses",
+    "slug": "valid-parentheses",
+    "difficulty": "Easy",
+    "tags": [
+      "Stack",
+      "String"
+    ],
+    "reason": "Standard LIFO stack validation for balanced bracket sequences."
+  },
+  {
+    "title": "Min Stack",
+    "slug": "min-stack",
+    "difficulty": "Medium",
+    "tags": [
+      "Stack",
+      "Design"
+    ],
+    "reason": "Learn how auxiliary data structures support O(1) minimum retrieval."
+  },
+  {
+    "title": "Reverse Linked List",
+    "slug": "reverse-linked-list",
+    "difficulty": "Easy",
+    "tags": [
+      "Linked List",
+      "Recursion"
+    ],
+    "reason": "Crucial pointer manipulation exercise for singly linked lists."
+  },
+  {
+    "title": "Merge Two Sorted Lists",
+    "slug": "merge-two-sorted-lists",
+    "difficulty": "Easy",
+    "tags": [
+      "Linked List",
+      "Recursion"
+    ],
+    "reason": "Foundational linked list merging pattern using dummy head pointers."
+  },
+  {
+    "title": "Linked List Cycle",
+    "slug": "linked-list-cycle",
+    "difficulty": "Easy",
+    "tags": [
+      "Linked List",
+      "Two Pointers"
+    ],
+    "reason": "Floyd's Tortoise and Hare algorithm for fast/slow pointer detection."
+  },
+  {
+    "title": "Invert Binary Tree",
+    "slug": "invert-binary-tree",
+    "difficulty": "Easy",
+    "tags": [
+      "Tree",
+      "Depth-First Search",
+      "Binary Tree"
+    ],
+    "reason": "Classic recursive tree traversal and left-right child swapping."
+  },
+  {
+    "title": "Maximum Depth of Binary Tree",
+    "slug": "maximum-depth-of-binary-tree",
+    "difficulty": "Easy",
+    "tags": [
+      "Tree",
+      "Depth-First Search",
+      "Breadth-First Search"
+    ],
+    "reason": "Introduction to recursive height computation of hierarchical structures."
+  },
+  {
+    "title": "Validate Binary Search Tree",
+    "slug": "validate-binary-search-tree",
+    "difficulty": "Medium",
+    "tags": [
+      "Tree",
+      "Depth-First Search",
+      "Binary Search Tree"
+    ],
+    "reason": "Understand BST invariance rules and bounding range propagation."
+  },
+  {
+    "title": "Number of Islands",
+    "slug": "number-of-islands",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Depth-First Search",
+      "Breadth-First Search",
+      "Graph"
+    ],
+    "reason": "The quintessential 2D grid connected-components graph traversal problem."
+  },
+  {
+    "title": "Course Schedule",
+    "slug": "course-schedule",
+    "difficulty": "Medium",
+    "tags": [
+      "Graph",
+      "Topological Sort",
+      "Depth-First Search"
+    ],
+    "reason": "Teaches cycle detection and topological sorting in directed acyclic graphs."
+  },
+  {
+    "title": "Word Search",
+    "slug": "word-search",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Backtracking",
+      "Matrix"
+    ],
+    "reason": "Classic backtracking problem for exploring grid paths with state rollback."
+  },
+  {
+    "title": "Combination Sum",
+    "slug": "combination-sum",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Backtracking"
+    ],
+    "reason": "Master decision-tree exploration with reuse of candidates."
+  },
+  {
+    "title": "Kth Largest Element in an Array",
+    "slug": "kth-largest-element-in-an-array",
+    "difficulty": "Medium",
+    "tags": [
+      "Array",
+      "Divide and Conquer",
+      "Heap",
+      "Quickselect"
+    ],
+    "reason": "Master min-heap prioritization and Quickselect linear-time partitioning."
+  },
+  {
+    "title": "Implement Trie (Prefix Tree)",
+    "slug": "implement-trie-prefix-tree",
+    "difficulty": "Medium",
+    "tags": [
+      "Design",
+      "Trie",
+      "String"
+    ],
+    "reason": "Learn how prefix trees enable fast string prefix matching and search engines."
+  }
+]

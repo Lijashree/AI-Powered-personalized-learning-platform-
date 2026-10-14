@@ -1,0 +1,27 @@
+# StudyMind Backend Dependencies
+# Generated for Python 3.9+
+
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# Database
+motor==3.4.0
+pymongo==4.7.2
+
+# Auth
+PyJWT==2.8.0
+bcrypt==4.1.3
+
+# Config & env
+python-dotenv==1.0.1
+pydantic==2.7.1
+
+# HTTP Client for OpenRouter API
+httpx>=0.27.0
+
+# Embeddings (semantic search / question tagging)
+sentence-transformers>=2.2.0
+scikit-learn>=0.24.0
+numpy>=1.21.0
+torch>=1.9.0
