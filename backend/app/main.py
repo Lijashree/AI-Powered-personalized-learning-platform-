@@ -28,16 +28,25 @@ async def startup_event():
 
 # CORS Setup
 origins_raw = settings.CORS_ORIGINS or "http://localhost:3000"
-origins = [o.strip() for o in origins_raw.split(",")]
+origins = [o.strip().rstrip("/") for o in origins_raw.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins if origins else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Root Endpoint
+# Root Index & Health Endpoints
+@app.get("/")
+async def root_index():
+    return {"message": "StudyMind API", "version": "1.0.0", "status": "running", "docs": "/docs", "health": "/api/health"}
+
+@app.get("/health")
+async def health_root():
+    return {"status": "ok", "service": "StudyMind API", "version": "1.0.0"}
+
+# Root Endpoint under /api
 @app.get("/api/")
 async def root():
     return {"message": "StudyMind API", "version": "1.0.0", "status": "running"}

@@ -4,9 +4,8 @@ import axios from "axios";
 // with REACT_APP_ for CRA to expose it to the browser bundle).
 // Falls back to localhost:8001 — make sure this matches whatever port your
 // `uvicorn server:app --reload` is actually listening on.
-const BASE_URL = process.env.REACT_APP_BACKEND_URL
-  ? `${process.env.REACT_APP_BACKEND_URL}/api`
-  : "http://localhost:8000/api";
+const rawBackendUrl = (process.env.REACT_APP_BACKEND_URL || "http://localhost:8000").replace(/\/+$/, "");
+const BASE_URL = rawBackendUrl.endsWith("/api") ? rawBackendUrl : `${rawBackendUrl}/api`;
 
 export const api = axios.create({
   baseURL: BASE_URL,
