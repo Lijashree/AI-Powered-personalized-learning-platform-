@@ -9,7 +9,7 @@ const BASE_URL = rawBackendUrl.endsWith("/api") ? rawBackendUrl : `${rawBackendU
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 60000, // 60s timeout to accommodate Render free tier cold starts & AI generation
+  timeout: 75000, // 75s timeout to comfortably accommodate Render cold starts & AI generation
   headers: {
     "Content-Type": "application/json",
   },

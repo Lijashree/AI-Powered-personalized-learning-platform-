@@ -17,6 +17,7 @@ from app.routes.interview import router as interview_router
 from app.routes.coding import router as coding_router
 from app.routes.planner import router as planner_router
 from app.routes.dashboard import router as dashboard_router
+import asyncio
 from app.routes.history_route import router as history_router
 from app.database import check_db_health, init_db
 
@@ -24,7 +25,9 @@ app = FastAPI(title="StudyMind API", version="1.0.0")
 
 @app.on_event("startup")
 async def startup_event():
-    await init_db()
+    # Run init_db asynchronously in background task so port binding is instantaneous
+    asyncio.create_task(init_db())
+
 
 # CORS Setup
 origins_raw = settings.CORS_ORIGINS or "http://localhost:3000"

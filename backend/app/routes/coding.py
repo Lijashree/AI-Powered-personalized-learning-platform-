@@ -39,14 +39,17 @@ async def create_coding_endpoint(body: CodingGenerateBody, user_id: str = Depend
 
 @router.post("/run")
 async def run_code(body: CodeExecutionRequest, user_id: str = Depends(get_current_user_id)):
-    if body.language == "python":
-        result = execute_python(body.code, body.stdin)
-    elif body.language == "java":
-        result = execute_java(body.code, body.stdin)
+    lang = (body.language or "").strip().lower()
+    input_str = body.stdin if (body.stdin is not None and body.stdin != "") else (body.input_data or "")
+    if lang == "python":
+        result = execute_python(body.code, input_str)
+    elif lang == "java":
+        result = execute_java(body.code, input_str)
     else:
-        raise HTTPException(status_code=400, detail="Unsupported language")
+        raise HTTPException(status_code=400, detail=f"Unsupported language '{body.language}'. Supported: python, java")
     
     return result
+
 
 @router.post("/save")
 async def save_code(body: CodeSaveBody, user_id: str = Depends(get_current_user_id)):

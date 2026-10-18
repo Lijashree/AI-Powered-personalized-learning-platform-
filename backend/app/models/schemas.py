@@ -15,7 +15,7 @@ class QuestionBody(BaseModel):
 
 class NotesGenerateBody(BaseModel):
     topic: str = Field(min_length=2, max_length=500)
-    mode: str = Field("detailed", pattern="^(short|detailed|exam)$")
+    mode: str = Field("detailed", pattern="^(?i)(short|detailed|exam)$")
 
 class QuizGenerateBody(BaseModel):
     topic: str = Field(min_length=2, max_length=500)
@@ -35,7 +35,7 @@ class FlashcardLearnBody(BaseModel):
     is_learned: bool
 
 class DoubtMessage(BaseModel):
-    role: str = Field(pattern="^(user|model)$")
+    role: str = Field(pattern="^(?i)(user|model|assistant)$")
     text: str
 
 class DoubtChatBody(BaseModel):
@@ -54,13 +54,13 @@ class RoadmapProgressBody(BaseModel):
 
 class InterviewGenerateBody(BaseModel):
     topic: str = Field(min_length=2, max_length=500)
-    level: str = Field("intermediate", pattern="^(beginner|intermediate|advanced)$")
+    level: str = Field("intermediate", pattern="^(?i)(beginner|intermediate|advanced)$")
 
 class CodingGenerateBody(BaseModel):
     topic: str = Field(min_length=2, max_length=500)
 
 class CodeExecutionRequest(BaseModel):
-    language: str = Field(pattern="^(python|java)$")
+    language: str = Field(pattern="^(?i)(python|java)$")
     code: str
     stdin: Optional[str] = ""
     input_data: Optional[str] = ""
@@ -71,8 +71,9 @@ class GoalCreateBody(BaseModel):
     target_date: Optional[str] = None # ISO format
 
 class CodeSaveBody(BaseModel):
-    language: str = Field(pattern="^(python|java)$")
+    language: str = Field(pattern="^(?i)(python|java)$")
     code: str
     stdin: Optional[str] = ""
     topic: Optional[str] = ""
     title: Optional[str] = ""
+

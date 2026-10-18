@@ -50,6 +50,10 @@ export default function CodingPractice() {
     try {
       const { data } = await api.post("/coding/generate", { topic: topic.trim() });
       setPracticeData(data);
+      setActiveChallengeIndex(0);
+      if (data.challenges?.[0]?.sample_input) {
+        setCustomInput(data.challenges[0].sample_input);
+      }
       toast.success("Coding challenges generated!");
     } catch (e) {
       toast.error(formatApiError(e));
@@ -57,6 +61,7 @@ export default function CodingPractice() {
       setGenerating(false);
     }
   };
+
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
@@ -175,7 +180,14 @@ export default function CodingPractice() {
             {practiceData.challenges.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => { setActiveChallengeIndex(idx); setShowSolution(false); }}
+                onClick={() => {
+                  setActiveChallengeIndex(idx);
+                  setShowSolution(false);
+                  const sampleIn = practiceData.challenges[idx]?.sample_input;
+                  if (sampleIn) {
+                    setCustomInput(sampleIn);
+                  }
+                }}
                 className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all ${
                   activeChallengeIndex === idx 
                     ? "bg-white text-black shadow-md" 
@@ -186,6 +198,7 @@ export default function CodingPractice() {
               </button>
             ))}
           </div>
+
 
           {/* Challenge Container */}
           <div className="bg-[#111111] border border-zinc-800 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
@@ -238,7 +251,19 @@ export default function CodingPractice() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {practiceData.challenges[activeChallengeIndex].sample_input && (
                   <div>
-                    <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Sample Input</h3>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Sample Input</h3>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomInput(practiceData.challenges[activeChallengeIndex].sample_input);
+                          toast.success("Loaded sample input into stdin!");
+                        }}
+                        className="text-[10px] text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-2 py-0.5 rounded font-mono transition-colors"
+                      >
+                        Load into stdin ↵
+                      </button>
+                    </div>
                     <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-xs font-mono text-zinc-300 whitespace-pre-wrap">
                       {practiceData.challenges[activeChallengeIndex].sample_input}
                     </div>
@@ -352,14 +377,28 @@ export default function CodingPractice() {
           <div className="flex flex-col h-[450px] bg-zinc-950">
             {/* Custom Input */}
             <div className="flex flex-col h-1/2 border-b border-zinc-800">
-              <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800 flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-bold text-zinc-300">Custom Input / stdin</span>
+              <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-zinc-400" />
+                  <span className="text-xs font-bold text-zinc-300">Custom Input / stdin</span>
+                </div>
+                {practiceData?.challenges?.[activeChallengeIndex]?.sample_input && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomInput(practiceData.challenges[activeChallengeIndex].sample_input);
+                      toast.success("Loaded sample input into stdin!");
+                    }}
+                    className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white px-2 py-0.5 rounded font-medium transition-colors border border-zinc-700"
+                  >
+                    Paste Sample Input
+                  </button>
+                )}
               </div>
               <textarea
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                placeholder="Enter custom input here... (e.g. 5\n10 20)"
+                placeholder="Enter input for input() or Scanner (or click Paste Sample Input above)..."
                 className="flex-1 w-full p-4 bg-transparent text-zinc-300 text-xs font-mono resize-none focus:outline-none"
               />
             </div>

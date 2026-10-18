@@ -5,6 +5,21 @@ import shutil
 import time
 import sys
 
+def _prepare_stdin(input_data: str) -> str:
+    """
+    Ensure stdin has safe newline termination, and if empty, provide a safe
+    newline buffer so basic input() calls do not crash with EOFError.
+    """
+    if input_data is None:
+        return "\n" * 10
+    
+    clean = str(input_data)
+    if clean.strip() == "":
+        return "\n" * 10
+    
+    return clean if clean.endswith("\n") else clean + "\n"
+
+
 def execute_python(code: str, input_data: str = "") -> dict:
     start_time = time.time()
     temp_file = None
@@ -13,30 +28,37 @@ def execute_python(code: str, input_data: str = "") -> dict:
             f.write(code)
             temp_file = f.name
             
+        stdin_payload = _prepare_stdin(input_data)
+
         process = subprocess.run(
             [sys.executable, temp_file],
-            input=input_data or "",
+            input=stdin_payload,
             text=True,
             encoding='utf-8',
             errors='replace',
             capture_output=True,
-            timeout=5
+            timeout=8
         )
         
         end_time = time.time()
+        stderr = process.stderr or ""
+        
+        # Add friendly diagnostic hint if EOFError occurs
+        if "EOFError" in stderr:
+            stderr += "\n💡 [StudyMind Hint]: Your code called input(), but ran out of input in stdin. Enter your input values in the 'Custom Input / stdin' box before running."
         
         return {
             "status": "success" if process.returncode == 0 else "runtime_error",
             "output": process.stdout,
-            "error": process.stderr,
+            "error": stderr,
             "execution_time": round(end_time - start_time, 3)
         }
     except subprocess.TimeoutExpired:
         return {
             "status": "timeout",
             "output": "",
-            "error": "Execution timed out.",
-            "execution_time": 5.0
+            "error": "Execution timed out (limit: 8s). Ensure your code does not contain infinite loops.",
+            "execution_time": 8.0
         }
     except Exception as e:
         return {
@@ -67,42 +89,47 @@ def execute_java(code: str, input_data: str = "") -> dict:
             encoding='utf-8',
             errors='replace',
             capture_output=True,
-            timeout=5
+            timeout=8
         )
         
         if compile_process.returncode != 0:
             return {
                 "status": "compilation_error",
                 "output": "",
-                "error": "Compilation Error:\n" + compile_process.stderr,
+                "error": "Compilation Error:\n" + (compile_process.stderr or ""),
                 "execution_time": round(time.time() - start_time, 3)
             }
             
         # Execute
+        stdin_payload = _prepare_stdin(input_data)
         run_process = subprocess.run(
             ['java', '-cp', temp_dir, 'Main'],
-            input=input_data or "",
+            input=stdin_payload,
             text=True,
             encoding='utf-8',
             errors='replace',
             capture_output=True,
-            timeout=5
+            timeout=8
         )
         
         end_time = time.time()
+        stderr = run_process.stderr or ""
+        
+        if "NoSuchElementException" in stderr:
+            stderr += "\n💡 [StudyMind Hint]: Your Java code requested input via Scanner/System.in, but no input was provided in 'Custom Input / stdin'."
         
         return {
             "status": "success" if run_process.returncode == 0 else "runtime_error",
             "output": run_process.stdout,
-            "error": run_process.stderr,
+            "error": stderr,
             "execution_time": round(end_time - start_time, 3)
         }
     except subprocess.TimeoutExpired:
         return {
             "status": "timeout",
             "output": "",
-            "error": "Execution timed out.",
-            "execution_time": 5.0
+            "error": "Execution timed out (limit: 8s). Ensure your code does not contain infinite loops.",
+            "execution_time": 8.0
         }
     except Exception as e:
         return {
@@ -113,3 +140,4 @@ def execute_java(code: str, input_data: str = "") -> dict:
         }
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
+

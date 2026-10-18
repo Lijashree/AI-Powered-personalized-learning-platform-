@@ -226,9 +226,32 @@ async def run_all_tests():
             run_data = res.json()
             assert run_data["status"] == "success"
             assert "4" in run_data["output"]
-            record("Code Execution Engine (/api/coding/run)", True, "Python code executed and returned output '4'")
+
+            # Test input() with empty stdin (must not throw EOFError)
+            res_input_empty = await client.post("/api/coding/run", headers=auth_headers, json={
+                "language": "python",
+                "code": "s = input()\nprint('Input received:', repr(s))",
+                "stdin": ""
+            })
+            assert res_input_empty.status_code == 200
+            run_empty = res_input_empty.json()
+            assert run_empty["status"] == "success", f"Failed with: {run_empty.get('error')}"
+
+            # Test input() with provided stdin
+            res_input_val = await client.post("/api/coding/run", headers=auth_headers, json={
+                "language": "python",
+                "code": "s = input()\nprint('Input received:', s)",
+                "stdin": "StudyMind Rocks"
+            })
+            assert res_input_val.status_code == 200
+            run_val = res_input_val.json()
+            assert run_val["status"] == "success"
+            assert "StudyMind Rocks" in run_val["output"]
+
+            record("Code Execution Engine (/api/coding/run)", True, "Python code executed with math and input() (both empty and populated stdin)")
         except Exception as e:
             record("Code Execution Engine (/api/coding/run)", False, str(e))
+
 
         # 12. Code Save (/api/coding/save)
         try:
