@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Brain, Sparkles, Search, Tag, BarChart3, ArrowRight, BookOpen, CheckCircle, Code2, Video, Database } from "lucide-react";
+import { pingBackend } from "../lib/api";
 
 const features = [
   {
@@ -48,6 +50,10 @@ const steps = [
 ];
 
 export default function Landing() {
+  useEffect(() => {
+    pingBackend();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
 

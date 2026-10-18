@@ -9,6 +9,7 @@ const BASE_URL = rawBackendUrl.endsWith("/api") ? rawBackendUrl : `${rawBackendU
 
 export const api = axios.create({
   baseURL: BASE_URL,
+  timeout: 60000, // 60s timeout to accommodate Render free tier cold starts & AI generation
   headers: {
     "Content-Type": "application/json",
   },
@@ -28,17 +29,40 @@ api.interceptors.request.use(
 );
 
 export function formatApiError(error) {
-  if (error.response?.data?.detail) {
+  if (error?.code === "ECONNABORTED" || error?.message?.toLowerCase().includes("timeout")) {
+    return "Server request timed out. The cloud backend is likely waking up from idle (Render free tier cold start). Please click again in a few seconds!";
+  }
+
+  if (error?.response?.data?.detail) {
     return error.response.data.detail;
   }
 
-  if (typeof error.response?.data === "string") {
+  if (typeof error?.response?.data === "string") {
     return error.response.data;
   }
 
-  if (error.message) {
+  if (error?.message === "Network Error" || !error?.response) {
+    return "Cannot reach StudyMind cloud server. It is likely spinning up from idle — please wait 20-30 seconds and retry.";
+  }
+
+  if (error?.message) {
     return error.message;
   }
 
-  return "Something went wrong.";
+  return "Something went wrong. Please check your connection and try again.";
 }
+
+/**
+ * Pre-warms the Render backend by sending a lightweight health check ping.
+ * Prevents cold-start delays when the user actually submits a form or requests AI content.
+ */
+export async function pingBackend() {
+  try {
+    const backendRoot = BASE_URL.replace(/\/api$/, "");
+    await axios.get(`${backendRoot}/health`, { timeout: 15000 });
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+

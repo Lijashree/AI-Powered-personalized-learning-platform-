@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
+import logging
 from fastapi import APIRouter, Depends, HTTPException
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, ServerSelectionTimeoutError, PyMongoError
 from app.database import get_db, safe_object_id
 from app.auth import hash_password, verify_password, create_access_token, get_current_user_id
 from app.models.schemas import SignupBody, LoginBody
 
+logger = logging.getLogger("studymind.auth")
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/signup")
@@ -12,7 +14,15 @@ async def signup(body: SignupBody):
     db = get_db()
     clean_email = body.email.lower().strip()
     clean_name = body.name.strip()
-    existing = await db.users.find_one({"email": clean_email})
+    try:
+        existing = await db.users.find_one({"email": clean_email})
+    except (ServerSelectionTimeoutError, PyMongoError) as e:
+        logger.error(f"MongoDB connection failure in signup: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection is warming up. Please wait a few seconds and retry."
+        )
+
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered.")
     doc = {
@@ -28,6 +38,12 @@ async def signup(body: SignupBody):
         result = await db.users.insert_one(doc)
     except DuplicateKeyError:
         raise HTTPException(status_code=409, detail="Email already registered.")
+    except (ServerSelectionTimeoutError, PyMongoError) as e:
+        logger.error(f"MongoDB insert failure in signup: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection error while creating account. Please retry in a moment."
+        )
     user_id = str(result.inserted_id)
     token = create_access_token(user_id, doc["email"])
     return {
@@ -39,7 +55,15 @@ async def signup(body: SignupBody):
 async def login(body: LoginBody):
     db = get_db()
     clean_email = body.email.lower().strip()
-    user = await db.users.find_one({"email": clean_email})
+    try:
+        user = await db.users.find_one({"email": clean_email})
+    except (ServerSelectionTimeoutError, PyMongoError) as e:
+        logger.error(f"MongoDB connection failure in login: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection is warming up. Please wait a few seconds and retry."
+        )
+
     if not user or not verify_password(body.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
     user_id = str(user["_id"])
@@ -62,10 +86,13 @@ async def login(body: LoginBody):
     else:
         streak = 1
         
-    await db.users.update_one(
-        {"_id": user["_id"]},
-        {"$set": {"streak": streak, "last_active_date": datetime.now(timezone.utc).isoformat()}}
-    )
+    try:
+        await db.users.update_one(
+            {"_id": user["_id"]},
+            {"$set": {"streak": streak, "last_active_date": datetime.now(timezone.utc).isoformat()}}
+        )
+    except Exception as e:
+        logger.warning(f"Could not update streak for user {user_id}: {e}")
     
     return {
         "token": token,
@@ -76,7 +103,14 @@ async def login(body: LoginBody):
 async def me(user_id: str = Depends(get_current_user_id)):
     db = get_db()
     oid = safe_object_id(user_id)
-    user = await db.users.find_one({"_id": oid})
+    try:
+        user = await db.users.find_one({"_id": oid})
+    except (ServerSelectionTimeoutError, PyMongoError) as e:
+        logger.error(f"MongoDB connection failure in /me: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection is temporarily busy. Please retry in a moment."
+        )
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
     return {

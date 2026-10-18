@@ -20,19 +20,32 @@ def get_client() -> AsyncIOMotorClient:
         return _client
 
     primary_url = settings.MONGO_URL or "mongodb://localhost:27017"
+    is_atlas = "mongodb.net" in primary_url or "mongodb+srv://" in primary_url
+    
+    # Resilient connection settings for cloud hosting, DNS SRV resolution & cold starts
+    options = {
+        "serverSelectionTimeoutMS": 10000,
+        "connectTimeoutMS": 10000,
+        "socketTimeoutMS": 20000,
+    }
+    if is_atlas:
+        options["maxIdleTimeMS"] = 45000  # Recycle idle sockets before Atlas proxy terminates them
+        options["retryWrites"] = True
+
     try:
-        # Attempt primary connection (e.g. Atlas or configured URI)
-        _client = AsyncIOMotorClient(primary_url, serverSelectionTimeoutMS=4000)
+        _client = AsyncIOMotorClient(primary_url, **options)
         _active_url = primary_url
         _last_error = None
     except (ConfigurationError, Exception) as e:
         _last_error = str(e)
         logger.warning(
-            f"Failed to initialize MongoDB client with configured MONGO_URL ({primary_url[:35]}...): {e}. "
-            "Falling back to local MongoDB at mongodb://localhost:27017"
+            f"Failed to initialize MongoDB client with configured MONGO_URL ({primary_url[:35]}...): {e}."
         )
-        _client = AsyncIOMotorClient("mongodb://localhost:27017", serverSelectionTimeoutMS=4000)
-        _active_url = "mongodb://localhost:27017"
+        if not is_atlas:
+            _client = AsyncIOMotorClient("mongodb://localhost:27017", serverSelectionTimeoutMS=4000)
+            _active_url = "mongodb://localhost:27017"
+        else:
+            raise
 
     return _client
 
@@ -58,35 +71,11 @@ async def check_db_health() -> dict:
             "active_url_masked": (_active_url[:20] + "...") if _active_url else "unknown",
             "collections": collections,
             "ping": ping_res,
-            "last_error": _last_error
+            "last_error": None
         }
-    except (ServerSelectionTimeoutError, ConfigurationError, Exception) as e:
-        # If primary failed during ping, attempt local fallback if not already attempted
-        if _active_url != "mongodb://localhost:27017":
-            try:
-                logger.warning(f"Database ping failed on {_active_url}: {e}. Retrying with local MongoDB.")
-                _client = AsyncIOMotorClient("mongodb://localhost:27017", serverSelectionTimeoutMS=3000)
-                _active_url = "mongodb://localhost:27017"
-                db = _client[settings.DB_NAME]
-                ping_res = await db.command("ping")
-                collections = await db.list_collection_names()
-                return {
-                    "status": "healthy",
-                    "connected": True,
-                    "database": settings.DB_NAME,
-                    "mode": "Local MongoDB (Fallback)",
-                    "active_url_masked": "mongodb://localhost:27017",
-                    "collections": collections,
-                    "ping": ping_res,
-                    "last_error": f"Primary connection failed: {str(e)}"
-                }
-            except Exception as fallback_err:
-                return {
-                    "status": "unhealthy",
-                    "connected": False,
-                    "database": settings.DB_NAME,
-                    "error": f"Primary: {str(e)}; Fallback: {str(fallback_err)}"
-                }
+    except Exception as e:
+        _last_error = str(e)
+        logger.error(f"Database health check failed: {e}")
         return {
             "status": "unhealthy",
             "connected": False,

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Brain, Loader2, CheckCircle2 } from "lucide-react";
+import { Brain, Loader2, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { pingBackend } from "../lib/api";
 
 export default function Login() {
   const { login } = useAuth();
@@ -10,22 +11,43 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [warmingUp, setWarmingUp] = useState(false);
   const [error, setError] = useState("");
+
+  // Pre-warm the backend container as soon as the user opens the login screen
+  useEffect(() => {
+    pingBackend();
+  }, []);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const res = await login(email, password);
-    setLoading(false);
-    if (res.ok) {
-      toast.success("Welcome back to StudyMind!");
-      navigate("/dashboard");
-    } else {
-      setError(res.error);
-      toast.error(res.error);
+    setWarmingUp(false);
+
+    // If request takes more than 3.5 seconds, Render is spinning up from idle
+    const coldStartTimer = setTimeout(() => {
+      setWarmingUp(true);
+    }, 3500);
+
+    try {
+      const res = await login(email, password);
+      if (res.ok) {
+        toast.success("Welcome back to StudyMind!");
+        navigate("/dashboard");
+      } else {
+        setError(res.error);
+        toast.error(res.error);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      clearTimeout(coldStartTimer);
+      setLoading(false);
+      setWarmingUp(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
@@ -120,8 +142,27 @@ export default function Login() {
               disabled={loading}
               className="w-full py-2.5 bg-zinc-900 hover:bg-black text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-black font-bold text-xs rounded-xl transition-all shadow flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign in to StudyMind"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>{warmingUp ? "Waking up cloud server..." : "Signing in..."}</span>
+                </>
+              ) : (
+                "Sign in to StudyMind"
+              )}
             </button>
+
+            {warmingUp && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs rounded-xl flex items-start gap-2 animate-pulse">
+                <Sparkles className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="font-semibold">Cloud server is waking up</p>
+                  <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                    Render free instances sleep after idle. Booting takes ~30 seconds — your request is being processed.
+                  </p>
+                </div>
+              </div>
+            )}
           </form>
 
           <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">

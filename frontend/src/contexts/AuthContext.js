@@ -18,8 +18,15 @@ export function AuthProvider({ children }) {
       const { data } = await api.get("/auth/me");
       setUser(data);
     } catch (err) {
-      localStorage.removeItem("studymind_token");
-      setUser(false);
+      // Only discard the token if the server explicitly rejected authentication
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        localStorage.removeItem("studymind_token");
+        setUser(false);
+      } else {
+        // Network timeout / cold start — keep token in localStorage and log
+        console.warn("Could not reach backend during session refresh:", err.message);
+        setUser(false);
+      }
     }
   }, []);
 
