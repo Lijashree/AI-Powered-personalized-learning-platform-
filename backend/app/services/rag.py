@@ -19,13 +19,12 @@ from typing import Dict, Any, Optional
 from app.database import get_db
 from app.embeddings import embed_text, cosine_similarity
  
-# Minimum cosine similarity (on normalized MiniLM embeddings) required to treat a
-# past item as a genuine semantic match for the student's current query.
-SIMILARITY_THRESHOLD = 0.55
+# Minimum cosine similarity required to treat a
+# past item as a genuine match for the student's current query.
+SIMILARITY_THRESHOLD = 0.30
  
-# Once a match at least this strong is found, later (lower-priority) collections
-# are skipped to avoid unnecessary embedding calls.
-STRONG_MATCH_CUTOFF = 0.80
+# Once a match at least this strong is found, later collections are skipped.
+STRONG_MATCH_CUTOFF = 0.60
  
 _EMPTY_RESULT = {
     "already_studied": False,

@@ -20,8 +20,6 @@ pydantic==2.7.1
 # HTTP Client for OpenRouter API
 httpx>=0.27.0
 
-# Embeddings (semantic search / question tagging)
-sentence-transformers>=2.2.0
-scikit-learn>=0.24.0
-numpy>=1.21.0
-torch>=1.9.0
+# Lightweight NLP & Vector Operations (under 10MB RAM, zero PyTorch overhead)
+scikit-learn>=1.3.0
+numpy>=1.24.0
